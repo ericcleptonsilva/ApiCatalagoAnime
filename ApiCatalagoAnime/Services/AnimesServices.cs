@@ -1,4 +1,6 @@
-﻿using ApiCatalagoAnime.Model.Input;
+﻿using ApiCatalagoAnime.Entities;
+using ApiCatalagoAnime.Exceptions;
+using ApiCatalagoAnime.Model.Input;
 using ApiCatalagoAnime.Model.View;
 using ApiCatalagoAnime.Repositories;
 using System;
@@ -18,7 +20,6 @@ namespace ApiCatalagoAnime.Services
 
         }
 
-
         public async Task<List<AnimesViewModel>> Obter(int pagina, int quantidade)
         {
             var animes = await _animesRepository.Obter(pagina, quantidade);
@@ -35,38 +36,92 @@ namespace ApiCatalagoAnime.Services
         }
 
 
-        public Task<AnimesViewModel> Obter(Guid id)
+        public async Task<AnimesViewModel> Obter(Guid id)
         {
-            throw new NotImplementedException();
+            var animes = await _animesRepository.Obter(id);
+
+            if (animes == null)
+                return null;
+            return new AnimesViewModel
+            {
+                Id = animes.Id,
+                Nome = animes.Nome,
+                Produtora = animes.Produtora,
+                Genero = animes.Genero,
+                Preco = animes.Preco
+            };
         }
 
 
-        public Task<AnimesViewModel> Inserir(AnimesInputModel anime)
+        public async Task<AnimesViewModel> Inserir(AnimesInputModel anime)
         {
-            throw new NotImplementedException();
+            var entidadeAnime = await _animesRepository.Obter(anime.Nome, anime.Produtora, anime.Genero);
+
+            if (entidadeAnime.Count > 0)
+                throw new AnimeJaCadastradoException();
+            var AnimeInsert = new Animes
+            { 
+                Id = Guid.NewGuid(),
+                Nome = anime.Nome,
+                Produtora = anime.Produtora,
+                Genero = anime.Genero,
+                Preco = anime.Preco
+            };
+
+            await _animesRepository.Inserir(AnimeInsert);
+
+            return new AnimesViewModel
+            { 
+                Id = AnimeInsert.Id,
+                Nome = anime.Nome,
+                Produtora = anime.Produtora,
+                Genero = anime.Genero,
+                Preco = anime.Preco
+            };
         }
 
 
-        public Task Atualizar(Guid id, AnimesInputModel anime)
+        public async Task Atualizar(Guid id, AnimesInputModel anime)
         {
-            throw new NotImplementedException();
+            var entidadeAnime = await _animesRepository.Obter(id);
+
+            if (entidadeAnime == null)
+                throw new AnimeNaoCadastradoException();
+
+            entidadeAnime.Nome = anime.Nome;
+            entidadeAnime.Produtora = anime.Produtora;
+            entidadeAnime.Genero = anime.Genero;
+            entidadeAnime.Preco = anime.Preco;
+
+            await _animesRepository.Atualizar(entidadeAnime);
+
         }
 
 
-        public Task Atualizar(Guid id, double preco)
+        public async Task Atualizar(Guid id, double preco)
         {
-            throw new NotImplementedException();
+            var entidadeAnime = await _animesRepository.Obter(id);
+
+            if (entidadeAnime == null)
+                throw new AnimeNaoCadastradoException();
+            entidadeAnime.Preco = preco;
+
+            await _animesRepository.Atualizar(entidadeAnime);
+
         }
 
 
-        public Task Remover(Guid id)
+        public async Task Remover(Guid id)
         {
-            throw new NotImplementedException();
+            var anime = await _animesRepository.Obter(id);
+            if (anime == null)
+                throw new AnimeNaoCadastradoException();
+            await _animesRepository.Remover(id);
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            _animesRepository?.Dispose();
         }
     }
 }

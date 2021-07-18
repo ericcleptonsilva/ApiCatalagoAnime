@@ -2,12 +2,11 @@
 using ApiCatalagoAnime.Model.View;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ApiCatalagoAnime.Services
 {
-    interface IAnimesServices : IDisposable
+    public interface IAnimesServices : IDisposable
     {
 
         Task<List<AnimesViewModel>> Obter(int pagina, int quantidade);
