@@ -121,7 +121,7 @@ namespace ApiCatalagoAnime.Repositories
 
         public async Task Remover(Guid id)
         {
-            var comando = $@"delete from Jogos where Id = '{id}'";
+            var comando = $@"delete from Animes where Id = '{id}'";
 
             await sqlConnection.OpenAsync();
             SqlCommand sqlCommand = new SqlCommand(comando, sqlConnection);
